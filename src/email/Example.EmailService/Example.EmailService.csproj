@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Seq" Version="9.1.0" />
+    <PackageReference Include="Aspire.NATS.Net" Version="9.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Example.ServiceDefaults\Example.ServiceDefaults.csproj" />
+  </ItemGroup>
+
+</Project>

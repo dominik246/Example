@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\notification\Example.NotificationsApi.Database\Example.NotificationsApi.Database.csproj" />
+    <ProjectReference Include="..\..\Example.ServiceDefaults\Example.ServiceDefaults.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.1.0" />
+    <PackageReference Include="Aspire.Seq" Version="9.1.0" />
+    <PackageReference Include="Aspire.NATS.Net" Version="9.1.0" />
+    <PackageReference Include="FastEndpoints" Version="5.35.0" />
+    <PackageReference Include="FastEndpoints.Security" Version="5.35.0" />
+    <PackageReference Include="FastEndpoints.Swagger" Version="5.35.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.3" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.0.30" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="FastEndpoints" />
+  </ItemGroup>
+
+</Project>

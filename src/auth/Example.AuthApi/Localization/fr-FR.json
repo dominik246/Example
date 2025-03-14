@@ -1,0 +1,6 @@
+{
+  "email.subjects.confirm-email": "Confirm Email",
+  "email.subjects.password-recovery": "Password Recovery",
+  "email.templates.confirm-email": "confirm-email",
+  "email.templates.password-recovery": "password-recovery"
+}
