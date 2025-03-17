@@ -1,18 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Localization;
-using Microsoft.Extensions.Options;
-
-using NATS.Client.Core;
-using NATS.Client.JetStream;
-using NATS.Net;
-
-using StackExchange.Redis;
-
-using System.Security.Cryptography;
-using System.Text.Json;
-
-using Example.AuthApi.Database;
+﻿using Example.AuthApi.Database;
 using Example.AuthApi.Database.Models;
 using Example.AuthApi.Feature.Auth.Dtos;
 using Example.ServiceDefaults;
@@ -21,12 +7,24 @@ using Example.ServiceDefaults.Consts;
 using Example.ServiceDefaults.Defaults;
 using Example.ServiceDefaults.Models;
 
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Options;
+
+using NATS.Client.JetStream;
+
+using StackExchange.Redis;
+
+using System.Security.Cryptography;
+using System.Text.Json;
+
 namespace Example.AuthApi.Feature.Auth.Handlers;
 
 public sealed record UserRegisterCommand(string Email, string Password) : ICommand<bool>;
 
 public sealed class UserRegisterCommandHandler(
-    AuthDbContext dbContext, IConnectionMultiplexer cache, IOptions<AuthCacheConfiguration> cacheConfig, IStringLocalizer localizer, INatsConnection natsConnection)
+    AuthDbContext dbContext, IConnectionMultiplexer cache, IOptions<AuthCacheConfiguration> cacheConfig, IStringLocalizer localizer, INatsJSContext natsConnection)
     : CommandHandler<UserRegisterCommand, bool>
 {
     public override async Task<bool> ExecuteAsync(UserRegisterCommand command, CancellationToken ct = default)
@@ -91,10 +89,9 @@ public sealed class UserRegisterCommandHandler(
         await db.StringSetAsync(key, cacheValue, cacheConfig.Value.ExpiryConfiguration.EmailConfirmExpiry);
     }
 
-    private static async Task<bool> SendEmail(INatsConnection connection, MailAddressModel model, CancellationToken ct)
+    private static async Task<bool> SendEmail(INatsJSContext jetStream, MailAddressModel model, CancellationToken ct)
     {
-        var jetStream = connection.CreateJetStreamContext();
-        var response = await jetStream.PublishAsync(NatsEvents.EmailPasswordRecoverEvent, model, new MailAddressModelSerializer(), cancellationToken: ct);
+        var response = await jetStream.PublishAsync(NatsEvents.EmailPasswordRecoverEvent, model, MailAddressModelSerializer.Default, cancellationToken: ct);
 
         return response.IsSuccess();
     }

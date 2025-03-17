@@ -1,7 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-
-using Example.Database.Base;
+﻿using Example.Database.Base;
 using Example.NotificationsApi.Database.Models;
+
+using Microsoft.EntityFrameworkCore;
 
 namespace Example.NotificationsApi.Database;
 

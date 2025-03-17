@@ -1,10 +1,10 @@
-﻿using NATS.Client.Core;
+﻿using Example.ServiceDefaults.Defaults;
+
+using NATS.Client.Core;
 
 using System.Buffers;
 using System.Text;
 using System.Text.Json;
-
-using Example.ServiceDefaults.Defaults;
 
 namespace Example.ServiceDefaults.Models;
 
@@ -12,6 +12,7 @@ public sealed record MailAddressModel(string Subject, string Template, string Se
 
 public sealed class MailAddressModelSerializer : INatsSerialize<MailAddressModel>, INatsDeserialize<MailAddressModel>
 {
+    public static readonly MailAddressModelSerializer Default = new();
     public MailAddressModel? Deserialize(in ReadOnlySequence<byte> buffer)
     {
         var json = Encoding.Default.GetString(buffer);

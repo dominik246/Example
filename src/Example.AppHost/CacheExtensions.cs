@@ -1,12 +1,12 @@
 ﻿using Aspire.Hosting.Redis;
 
+using Example.ServiceDefaults.Configuration;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using System.Reflection;
 using System.Text;
-
-using Example.ServiceDefaults.Configuration;
 
 namespace Example.AppHost;
 

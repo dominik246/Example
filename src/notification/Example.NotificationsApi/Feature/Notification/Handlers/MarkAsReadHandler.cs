@@ -1,10 +1,9 @@
-﻿using FastEndpoints.Security;
+﻿using Example.NotificationsApi.Database;
+using Example.ServiceDefaults.Consts;
+
+using FastEndpoints.Security;
 
 using Microsoft.EntityFrameworkCore;
-
-using Example.NotificationsApi.Database;
-using Example.NotificationsApi.Database.Models;
-using Example.ServiceDefaults.Consts;
 
 namespace Example.NotificationsApi.Feature.Notification.Handlers;
 

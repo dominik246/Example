@@ -1,16 +1,16 @@
-﻿using Microsoft.Extensions.Options;
-
-using NATS.Client.Core;
-using NATS.Client.JetStream.Models;
-using NATS.Net;
-
-using Example.ServiceDefaults;
+﻿using Example.ServiceDefaults;
 using Example.ServiceDefaults.Configuration;
 using Example.ServiceDefaults.Models;
 
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
+
+using NATS.Client.JetStream;
+using NATS.Client.JetStream.Models;
+
 namespace Example.EmailService.Feature.SendEmail;
 
-public sealed class SendEmailHostedService(INatsConnection natsConnection, SendEmailClient emailClient, IOptions<EmailConfiguration> emailConfig) : BackgroundService
+public sealed class SendEmailHostedService(INatsJSContext jetStream, SendEmailClient emailClient, IOptions<EmailConfiguration> emailConfig) : BackgroundService
 {
     private static readonly StreamConfig StreamConfig = new(NatsStreams.EmailStream, [NatsEvents.EmailPasswordRecoverEvent])
     {
@@ -22,8 +22,6 @@ public sealed class SendEmailHostedService(INatsConnection natsConnection, SendE
 
     public override async Task StartAsync(CancellationToken cancellationToken)
     {
-        var jetStream = natsConnection.CreateJetStreamContext();
-
         // this is not the best solution in the world but it works... the issue is that the stream has to be created somewhere;
         // usually it gets created by the dedicated service.
         // since we self-host for dev purposes we don't have such a luxury therefore we have to create it somewhere in the code;
@@ -47,18 +45,16 @@ public sealed class SendEmailHostedService(INatsConnection natsConnection, SendE
     {
         await base.StopAsync(cancellationToken);
 
-        var jetStream = natsConnection.CreateJetStreamContext();
         await jetStream.DeleteConsumerAsync(NatsStreams.EmailStream, NatsConsumers.EmailConsumer, cancellationToken);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var jetStream = natsConnection.CreateJetStreamContext();
         var consumer = await jetStream.GetConsumerAsync(NatsStreams.EmailStream, NatsConsumers.EmailConsumer, stoppingToken);
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            await foreach (var item in consumer.ConsumeAsync(new MailAddressModelSerializer(), cancellationToken: stoppingToken))
+            await foreach (var item in consumer.ConsumeAsync(MailAddressModelSerializer.Default, cancellationToken: stoppingToken))
             {
                 if (item.Data is null)
                 {

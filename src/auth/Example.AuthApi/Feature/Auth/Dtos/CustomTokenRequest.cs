@@ -1,8 +1,8 @@
-﻿using FastEndpoints.Security;
+﻿using Example.ServiceDefaults.Consts;
+
+using FastEndpoints.Security;
 
 using FluentValidation;
-
-using Example.ServiceDefaults.Consts;
 
 namespace Example.AuthApi.Feature.Auth.Dtos;
 

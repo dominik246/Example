@@ -1,11 +1,11 @@
-﻿using FastEndpoints.Security;
+﻿using Example.AuthApi.Feature.Auth.Dtos;
+using Example.AuthApi.Feature.Auth.Handlers;
+using Example.ServiceDefaults.Consts;
+
+using FastEndpoints.Security;
 
 using System.Security.Claims;
 using System.Text.Json;
-
-using Example.AuthApi.Feature.Auth.Dtos;
-using Example.AuthApi.Feature.Auth.Handlers;
-using Example.ServiceDefaults.Consts;
 
 namespace Example.AuthApi.Feature.Auth.Endpoints;
 

@@ -1,7 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-
-using Example.AuthApi.Database;
+﻿using Example.AuthApi.Database;
 using Example.AuthApi.Feature.Group.Dtos;
+
+using Microsoft.EntityFrameworkCore;
 
 namespace Example.AuthApi.Feature.Group.Handlers;
 
@@ -19,7 +19,7 @@ public sealed class GetByIdCommandHandler(AuthDbContext db) : CommandHandler<Get
         }
 
         var mapped = dbEntry.ConvertAll(p => new UserDto(p.User!.Id, p.User.Email, p.User.IsDisabled, p.User.EmailConfirmed));
-        
+
         var group = dbEntry[0].Group!;
         return new GetByIdResponse(new(group.Id, group.Name, group.IsAdminGroup), mapped);
     }

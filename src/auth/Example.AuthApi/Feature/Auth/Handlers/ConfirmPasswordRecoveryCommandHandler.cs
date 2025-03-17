@@ -1,13 +1,13 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Example.AuthApi.Database;
+using Example.AuthApi.Database.Models;
+using Example.ServiceDefaults.Defaults;
+
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 using StackExchange.Redis;
 
 using System.Text.Json;
-
-using Example.AuthApi.Database;
-using Example.AuthApi.Database.Models;
-using Example.ServiceDefaults.Defaults;
 
 namespace Example.AuthApi.Feature.Auth.Handlers;
 

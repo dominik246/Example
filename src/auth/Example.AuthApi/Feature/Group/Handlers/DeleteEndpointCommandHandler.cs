@@ -1,8 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
-
-using Example.AuthApi.Database;
+﻿using Example.AuthApi.Database;
 using Example.ServiceDefaults.Consts;
+
 using FastEndpoints.Security;
+
+using Microsoft.EntityFrameworkCore;
 
 namespace Example.AuthApi.Feature.Group.Handlers;
 

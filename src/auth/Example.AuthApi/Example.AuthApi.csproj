@@ -12,15 +12,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.1.0" />
-    <PackageReference Include="Aspire.Seq" Version="9.1.0" />
-    <PackageReference Include="Aspire.NATS.Net" Version="9.1.0" />
-    <PackageReference Include="FastEndpoints" Version="5.35.0" />
-    <PackageReference Include="FastEndpoints.Security" Version="5.35.0" />
-    <PackageReference Include="FastEndpoints.Swagger" Version="5.35.0" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.3" />
-    <PackageReference Include="Scalar.AspNetCore" Version="2.0.30" />
-    <PackageReference Include="Aspire.StackExchange.Redis" Version="9.1.0" />
+    <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <PackageReference Include="Aspire.Seq" />
+    <PackageReference Include="Aspire.NATS.Net" />
+    <PackageReference Include="FastEndpoints" />
+    <PackageReference Include="FastEndpoints.Security" />
+    <PackageReference Include="FastEndpoints.Swagger" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Scalar.AspNetCore" />
+    <PackageReference Include="Aspire.StackExchange.Redis" />
   </ItemGroup>
 
   <ItemGroup>

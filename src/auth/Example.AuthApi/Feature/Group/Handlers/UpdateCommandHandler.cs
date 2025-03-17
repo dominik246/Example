@@ -1,13 +1,14 @@
 ﻿using EntityFramework.Exceptions.Common;
 
-using Microsoft.EntityFrameworkCore;
-
 using Example.AuthApi.Database;
 using Example.AuthApi.Database.Models;
+using Example.ServiceDefaults.Consts;
+
+using FastEndpoints.Security;
+
+using Microsoft.EntityFrameworkCore;
 
 using AddErr = System.Action<System.Linq.Expressions.Expression<System.Func<Example.AuthApi.Feature.Group.Handlers.UpdateCommand, object?>>, string, string?>;
-using Example.ServiceDefaults.Consts;
-using FastEndpoints.Security;
 
 namespace Example.AuthApi.Feature.Group.Handlers;
 
@@ -22,7 +23,6 @@ public sealed class UpdateCommandHandler(AuthDbContext db, IHttpContextAccessor 
         {
             AddError(p => p.Id, "Group not found.", "404");
             return false;
-
         }
 
         var userId = accessor.HttpContext?.User.ClaimValue(JwtClaimConsts.UserId);

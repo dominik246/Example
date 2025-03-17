@@ -1,6 +1,6 @@
-﻿using FluentValidation;
+﻿using Example.ServiceDefaults.Consts;
 
-using Example.ServiceDefaults.Consts;
+using FluentValidation;
 
 namespace Example.AuthApi.Feature.Auth.Dtos;
 

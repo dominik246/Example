@@ -16,12 +16,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.AppHost" Version="9.1.0" />
-    <PackageReference Include="Aspire.Hosting.Nats" Version="9.1.0" />
-    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="9.1.0" />
-    <PackageReference Include="Aspire.Hosting.Redis" Version="9.1.0" />
-    <PackageReference Include="Aspire.Hosting.Seq" Version="9.1.0" />
-    <PackageReference Include="OpenTelemetry.Api" Version="1.11.2" />
+    <PackageReference Include="Aspire.Hosting.AppHost" />
+    <PackageReference Include="Aspire.Hosting.Nats" />
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" />
+    <PackageReference Include="Aspire.Hosting.Redis" />
+    <PackageReference Include="Aspire.Hosting.Seq" />
+    <PackageReference Include="OpenTelemetry.Api" />
   </ItemGroup>
 
 </Project>

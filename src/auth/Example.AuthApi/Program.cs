@@ -1,11 +1,17 @@
 using EntityFramework.Exceptions.PostgreSQL;
 
+using Example.AuthApi.Database;
+using Example.AuthApi.Feature.Auth;
+using Example.AuthApi.Feature.Auth.Dtos;
+using Example.Database.Base.Interceptors;
+using Example.ServiceDefaults;
+using Example.ServiceDefaults.Configuration;
+using Example.ServiceDefaults.Consts;
+
 using FastEndpoints.Security;
 using FastEndpoints.Swagger;
 
 using Microsoft.EntityFrameworkCore;
-
-using NATS.Client.Core;
 
 using Newtonsoft.Json.Converters;
 
@@ -15,14 +21,6 @@ using NJsonSchema.Generation.TypeMappers;
 using Scalar.AspNetCore;
 
 using System.Text.Json.Serialization;
-
-using Example.AuthApi.Database;
-using Example.AuthApi.Feature.Auth;
-using Example.AuthApi.Feature.Auth.Dtos;
-using Example.Database.Base.Interceptors;
-using Example.ServiceDefaults;
-using Example.ServiceDefaults.Configuration;
-using Example.ServiceDefaults.Consts;
 
 namespace Example.AuthApi;
 
@@ -51,7 +49,8 @@ public static class Program
 
         builder.AddSeqEndpoint(ConnectionStrings.Seq);
         builder.AddRedisClient(ConnectionStrings.AuthCache);
-        builder.AddNatsClient(ConnectionStrings.NatsServer, (IServiceProvider _, NatsOpts opt) => opt with { WaitUntilSent = false });
+        builder.AddNatsClient(ConnectionStrings.NatsServer);
+        builder.AddNatsJetStream();
 
         builder.ConfigureLocalizer();
 

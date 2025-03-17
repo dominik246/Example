@@ -12,7 +12,7 @@ public readonly ref struct ConnectionStrings
 public readonly ref struct ProjectNames
 {
     public const string AuthApi = "authapi";
-    public const string EmailServiceApi = "emailserviceapi";
+    public const string EmailService = "emailservice";
     public const string NotificationApi = "notificationApi";
 }
 

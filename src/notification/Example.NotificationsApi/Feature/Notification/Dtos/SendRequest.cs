@@ -1,7 +1,5 @@
 ﻿using Example.NotificationsApi.Database.Enums;
 
-using Newtonsoft.Json.Converters;
-
 using System.Text.Json.Serialization;
 
 namespace Example.NotificationsApi.Feature.Notification.Dtos;

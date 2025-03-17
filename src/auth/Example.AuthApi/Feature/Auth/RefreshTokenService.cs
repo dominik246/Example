@@ -1,4 +1,10 @@
-﻿using FastEndpoints.Security;
+﻿using Example.AuthApi.Database;
+using Example.AuthApi.Database.Models;
+using Example.AuthApi.Feature.Auth.Dtos;
+using Example.ServiceDefaults.Configuration;
+using Example.ServiceDefaults.Defaults;
+
+using FastEndpoints.Security;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -7,15 +13,7 @@ using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
 
 using System.Linq.Expressions;
-using System.Security.Claims;
 using System.Text.Json;
-
-using Example.AuthApi.Database;
-using Example.AuthApi.Database.Models;
-using Example.AuthApi.Feature.Auth.Dtos;
-using Example.ServiceDefaults.Configuration;
-using Example.ServiceDefaults.Consts;
-using Example.ServiceDefaults.Defaults;
 
 namespace Example.AuthApi.Feature.Auth;
 

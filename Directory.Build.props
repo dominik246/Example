@@ -6,16 +6,16 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
-	<PropertyGroup>
-		<Authors>TostCorp</Authors>
-	</PropertyGroup>
+  <PropertyGroup>
+    <Authors>TostCorp</Authors>
+  </PropertyGroup>
     
     <PropertyGroup>
         <NoWarn>CS7035;CA1819;CA2007;CS1591</NoWarn>
     </PropertyGroup>
     
     <PropertyGroup>
-		    <WarningLevel>9999</WarningLevel>
+        <WarningLevel>9999</WarningLevel>
         <AnalysisLevel>latest-recommended</AnalysisLevel>
         <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
     </PropertyGroup>
@@ -26,19 +26,12 @@
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<TreatWarningsAsErrors>False</TreatWarningsAsErrors>
-	</PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+  </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-	</PropertyGroup>
-
-	<ItemGroup>
-		<PackageReference Include="Roslynator.Analyzers" Version="4.13.1">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-	</ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+  </PropertyGroup>
 
 </Project>
