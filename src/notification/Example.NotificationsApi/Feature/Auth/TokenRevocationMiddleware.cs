@@ -1,13 +1,13 @@
-﻿using FastEndpoints.Security;
+﻿using Example.ServiceDefaults.Configuration;
+using Example.ServiceDefaults.Consts;
+
+using FastEndpoints.Security;
 
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Options;
 
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-
-using Example.ServiceDefaults.Configuration;
-using Example.ServiceDefaults.Consts;
 
 namespace Example.NotificationsApi.Feature.Auth;
 

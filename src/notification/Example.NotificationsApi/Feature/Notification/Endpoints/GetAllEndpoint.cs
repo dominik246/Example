@@ -1,7 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-
-using Example.NotificationsApi.Feature.Notification.Dtos;
+﻿using Example.NotificationsApi.Feature.Notification.Dtos;
 using Example.NotificationsApi.Feature.Notification.Handlers;
+
+using Microsoft.EntityFrameworkCore;
 
 namespace Example.NotificationsApi.Feature.Notification.Endpoints;
 

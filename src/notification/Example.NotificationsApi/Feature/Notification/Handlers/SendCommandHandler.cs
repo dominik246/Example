@@ -1,9 +1,9 @@
-﻿using FastEndpoints.Security;
-
-using Example.NotificationsApi.Database;
+﻿using Example.NotificationsApi.Database;
 using Example.NotificationsApi.Database.Enums;
 using Example.NotificationsApi.Database.Models;
 using Example.ServiceDefaults.Consts;
+
+using FastEndpoints.Security;
 
 namespace Example.NotificationsApi.Feature.Notification.Handlers;
 

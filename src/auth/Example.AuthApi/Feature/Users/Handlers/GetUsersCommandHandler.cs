@@ -1,9 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
-
-using Example.AuthApi.Database;
+﻿using Example.AuthApi.Database;
 using Example.AuthApi.Database.Models;
 using Example.AuthApi.Feature.Group.Dtos;
 using Example.AuthApi.Feature.Users.Dtos;
+
+using Microsoft.EntityFrameworkCore;
 
 namespace Example.AuthApi.Feature.Users.Handlers;
 

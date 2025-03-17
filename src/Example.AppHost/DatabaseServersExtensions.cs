@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Example.ServiceDefaults.Configuration;
 
-using Example.ServiceDefaults.Configuration;
+using Microsoft.Extensions.Configuration;
 
 namespace Example.AppHost;
 

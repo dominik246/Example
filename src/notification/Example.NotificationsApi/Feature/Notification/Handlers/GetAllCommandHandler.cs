@@ -1,14 +1,14 @@
-﻿using FastEndpoints.Security;
-
-using Microsoft.EntityFrameworkCore;
-
-using System.Text.Json;
-
-using Example.NotificationsApi.Database;
+﻿using Example.NotificationsApi.Database;
 using Example.NotificationsApi.Database.Enums;
 using Example.NotificationsApi.Database.Models;
 using Example.NotificationsApi.Feature.Notification.Dtos;
 using Example.ServiceDefaults.Consts;
+
+using FastEndpoints.Security;
+
+using Microsoft.EntityFrameworkCore;
+
+using System.Text.Json;
 
 namespace Example.NotificationsApi.Feature.Notification.Handlers;
 

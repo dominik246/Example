@@ -1,4 +1,10 @@
-﻿using FastEndpoints.Security;
+﻿using Example.AuthApi.Database;
+using Example.AuthApi.Database.Models;
+using Example.ServiceDefaults.Configuration;
+using Example.ServiceDefaults.Consts;
+using Example.ServiceDefaults.Defaults;
+
+using FastEndpoints.Security;
 
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
@@ -9,12 +15,6 @@ using StackExchange.Redis;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text.Json;
-
-using Example.AuthApi.Database;
-using Example.AuthApi.Database.Models;
-using Example.ServiceDefaults.Configuration;
-using Example.ServiceDefaults.Defaults;
-using Example.ServiceDefaults.Consts;
 
 namespace Example.AuthApi.Feature.Auth;
 

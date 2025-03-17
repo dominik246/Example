@@ -1,12 +1,12 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Example.ServiceDefaults.Configuration;
+using Example.ServiceDefaults.Models;
+
+using Microsoft.Extensions.Options;
 
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Unicode;
-
-using Example.ServiceDefaults.Configuration;
-using Example.ServiceDefaults.Models;
 
 namespace Example.EmailService.Feature.SendEmail;
 

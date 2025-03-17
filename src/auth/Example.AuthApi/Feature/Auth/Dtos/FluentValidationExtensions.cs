@@ -2,7 +2,7 @@
 
 using System.Text.RegularExpressions;
 
-namespace Example.ApiService.Feature.Dtos;
+namespace Example.AuthApi.Feature.Auth.Dtos;
 
 public static partial class FluentValidationExtensions
 {

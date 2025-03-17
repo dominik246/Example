@@ -3,8 +3,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-using Example.ApiService.Feature.Dtos;
-
 namespace Example.AuthApi.Feature.Auth.Dtos;
 
 public sealed record AuthPassword(string Password)

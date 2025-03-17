@@ -1,12 +1,10 @@
-﻿using FastEndpoints.Security;
-
-using Microsoft.EntityFrameworkCore;
-
-using System.Security.Claims;
-
-using Example.AuthApi.Database;
+﻿using Example.AuthApi.Database;
 using Example.AuthApi.Database.Models;
 using Example.ServiceDefaults.Consts;
+
+using FastEndpoints.Security;
+
+using Microsoft.EntityFrameworkCore;
 
 namespace Example.AuthApi.Feature.Users.Handlers;
 

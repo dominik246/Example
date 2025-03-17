@@ -26,11 +26,11 @@ public static class Program
         authApi.WithReference(nats).WaitFor(nats);
         authApi.WithReference(seq).WaitFor(seq);
 
-        var emailServiceApi = builder.ConfigureApi<Projects.Example_EmailService>(ProjectNames.EmailServiceApi)
+        var emailService = builder.ConfigureApi<Projects.Example_EmailService>(ProjectNames.EmailService)
             .WithEnvironmentSection(EmailConfiguration.SectionName);
 
-        emailServiceApi.WithReference(nats).WaitFor(nats);
-        emailServiceApi.WithReference(seq).WaitFor(seq);
+        emailService.WithReference(nats).WaitFor(nats);
+        emailService.WithReference(seq).WaitFor(seq);
 
         var notificationApi = builder.ConfigureApi<Projects.Example_NotificationsApi>(ProjectNames.NotificationApi)
             .WithEnvironmentSection(JwtConfiguration.SectionName)

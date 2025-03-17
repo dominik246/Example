@@ -1,7 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-
-using Example.AuthApi.Feature.Group.Dtos;
+﻿using Example.AuthApi.Feature.Group.Dtos;
 using Example.AuthApi.Feature.Group.Handlers;
+
+using Microsoft.EntityFrameworkCore;
 
 namespace Example.AuthApi.Feature.Group.Endpoints;
 

@@ -1,13 +1,10 @@
-﻿using EntityFramework.Exceptions.PostgreSQL;
+﻿using Example.Database.Base.BaseModels;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
 using System.Linq.Expressions;
-
 using System.Reflection;
-
-using Example.Database.Base.BaseModels;
 
 namespace Example.Database.Base;
 

@@ -2,13 +2,17 @@ using Example.EmailService.Feature.SendEmail;
 using Example.ServiceDefaults;
 using Example.ServiceDefaults.Configuration;
 
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+
 namespace Example.EmailService;
 
 public static class Program
 {
     public static async Task Main(params string[] args)
     {
-        var builder = WebApplication.CreateBuilder(args);
+        var builder = Host.CreateApplicationBuilder(args);
 
         // Add service defaults & Aspire client integrations.
         builder.AddServiceDefaults();
@@ -25,6 +29,7 @@ public static class Program
 
         builder.AddSeqEndpoint(ConnectionStrings.Seq);
         builder.AddNatsClient(ConnectionStrings.NatsServer);
+        builder.AddNatsJetStream();
 
         builder.Services.Configure<EmailConfiguration>(builder.Configuration.GetRequiredSection(EmailConfiguration.SectionName));
 
@@ -32,11 +37,6 @@ public static class Program
         builder.Services.AddHostedService<SendEmailHostedService>();
 
         var app = builder.Build();
-
-        // Configure the HTTP request pipeline.
-        app.UseExceptionHandler();
-
-        app.MapDefaultEndpoints();
 
         await app.RunAsync();
     }

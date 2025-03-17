@@ -1,7 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-
-using Example.AuthApi.Database.Models;
+﻿using Example.AuthApi.Database.Models;
 using Example.Database.Base;
+
+using Microsoft.EntityFrameworkCore;
 
 namespace Example.AuthApi.Database;
 

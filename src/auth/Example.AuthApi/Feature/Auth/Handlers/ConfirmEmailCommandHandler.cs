@@ -1,12 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Example.AuthApi.Database;
+using Example.AuthApi.Feature.Auth.Dtos;
+using Example.ServiceDefaults.Defaults;
+
+using Microsoft.EntityFrameworkCore;
 
 using StackExchange.Redis;
 
 using System.Text.Json;
-
-using Example.AuthApi.Database;
-using Example.AuthApi.Feature.Auth.Dtos;
-using Example.ServiceDefaults.Defaults;
 
 namespace Example.AuthApi.Feature.Auth.Handlers;
 

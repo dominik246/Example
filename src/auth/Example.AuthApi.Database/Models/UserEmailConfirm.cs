@@ -1,6 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Example.Database.Base.BaseModels;
 
-using Example.Database.Base.BaseModels;
+using System.ComponentModel.DataAnnotations;
 
 namespace Example.AuthApi.Database.Models;
 

@@ -1,28 +1,26 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Localization;
-using Microsoft.Extensions.Options;
-
-using NATS.Client.Core;
-using NATS.Client.JetStream;
-using NATS.Net;
-
-using StackExchange.Redis;
-
-using System.Security.Cryptography;
-
-using Example.AuthApi.Database;
+﻿using Example.AuthApi.Database;
 using Example.AuthApi.Database.Models;
 using Example.ServiceDefaults;
 using Example.ServiceDefaults.Configuration;
 using Example.ServiceDefaults.Consts;
 using Example.ServiceDefaults.Models;
 
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Options;
+
+using NATS.Client.JetStream;
+
+using StackExchange.Redis;
+
+using System.Security.Cryptography;
+
 namespace Example.AuthApi.Feature.Auth.Handlers;
 
 public sealed record PasswordRecoveryCommand(string Email) : ICommand<bool>;
 
 public sealed class PasswordRecoveryCommandHandler(
-    AuthDbContext dbContext, IConnectionMultiplexer cache, IOptions<AuthCacheConfiguration> cacheConfig, IStringLocalizer localizer, INatsConnection natsConnection)
+    AuthDbContext dbContext, IConnectionMultiplexer cache, IOptions<AuthCacheConfiguration> cacheConfig, IStringLocalizer localizer, INatsJSContext natsConnection)
     : CommandHandler<PasswordRecoveryCommand, bool>
 {
     public override async Task<bool> ExecuteAsync(PasswordRecoveryCommand command, CancellationToken ct = default)
@@ -45,7 +43,7 @@ public sealed class PasswordRecoveryCommandHandler(
     }
 
     private static async Task<string?> GenerateAndPersistKey(
-        AuthDbContext dbContext, IConnectionMultiplexer cache, IOptions<AuthCacheConfiguration> cacheConfig, IStringLocalizer localizer, INatsConnection nats, User user, CancellationToken ct)
+        AuthDbContext dbContext, IConnectionMultiplexer cache, IOptions<AuthCacheConfiguration> cacheConfig, IStringLocalizer localizer, INatsJSContext nats, User user, CancellationToken ct)
     {
         var hash = RandomNumberGenerator.GetHexString(AuthConsts.PasswordRecoveryHexLength);
 
@@ -63,10 +61,9 @@ public sealed class PasswordRecoveryCommandHandler(
         return hash;
     }
 
-    private static async Task<bool> SendEmail(INatsConnection connection, MailAddressModel model, CancellationToken ct)
+    private static async Task<bool> SendEmail(INatsJSContext jetStream, MailAddressModel model, CancellationToken ct)
     {
-        var jetStream = connection.CreateJetStreamContext();
-        var response = await jetStream.PublishAsync(NatsEvents.EmailPasswordRecoverEvent, model, new MailAddressModelSerializer(), cancellationToken: ct);
+        var response = await jetStream.PublishAsync(NatsEvents.EmailPasswordRecoverEvent, model, MailAddressModelSerializer.Default, cancellationToken: ct);
 
         return response.IsSuccess();
     }

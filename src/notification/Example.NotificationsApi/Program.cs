@@ -1,6 +1,13 @@
 
 using EntityFramework.Exceptions.PostgreSQL;
 
+using Example.Database.Base.Interceptors;
+using Example.NotificationsApi.Database;
+using Example.NotificationsApi.Feature.Auth;
+using Example.ServiceDefaults;
+using Example.ServiceDefaults.Configuration;
+using Example.ServiceDefaults.Consts;
+
 using FastEndpoints.Security;
 using FastEndpoints.Swagger;
 
@@ -10,16 +17,9 @@ using NATS.Client.Core;
 
 using Newtonsoft.Json.Converters;
 
-using Scalar.AspNetCore;
-
-using Example.NotificationsApi.Database;
-using Example.NotificationsApi.Feature.Auth;
-using Example.ServiceDefaults;
-using Example.ServiceDefaults.Configuration;
-using Example.ServiceDefaults.Consts;
 using NJsonSchema.Generation.TypeMappers;
-using Example.NotificationsApi.Database.Enums;
-using Example.Database.Base.Interceptors;
+
+using Scalar.AspNetCore;
 
 namespace Example.NotificationsApi;
 

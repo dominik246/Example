@@ -1,9 +1,9 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Example.ServiceDefaults;
+using Example.ServiceDefaults.Configuration;
+
+using Microsoft.Extensions.Configuration;
 
 using System.Reflection;
-
-using Example.ServiceDefaults;
-using Example.ServiceDefaults.Configuration;
 
 namespace Example.AppHost;
 

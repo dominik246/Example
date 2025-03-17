@@ -1,7 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-using Example.Database.Base.BaseModels;
+﻿using Example.Database.Base.BaseModels;
 using Example.NotificationsApi.Database.Enums;
+
+using System.ComponentModel.DataAnnotations;
 
 namespace Example.NotificationsApi.Database.Models;
 
