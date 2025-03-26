@@ -1,23 +1,10 @@
-
-using EntityFramework.Exceptions.PostgreSQL;
-
-using Example.Database.Base.Interceptors;
+using Example.Api.Base;
+using Example.Api.Base.Consts;
 using Example.NotificationsApi.Database;
 using Example.NotificationsApi.Feature.Auth;
 using Example.ServiceDefaults;
-using Example.ServiceDefaults.Configuration;
-using Example.ServiceDefaults.Consts;
 
 using FastEndpoints.Security;
-using FastEndpoints.Swagger;
-
-using Microsoft.EntityFrameworkCore;
-
-using NATS.Client.Core;
-
-using Newtonsoft.Json.Converters;
-
-using NJsonSchema.Generation.TypeMappers;
 
 using Scalar.AspNetCore;
 
@@ -39,7 +26,7 @@ public static class Program
         builder.Services.AddAuthorization();
         builder.Services.ConfigureSwagger();
         builder.Services.AddFastEndpoints();
-        builder.ConfigureDb();
+        builder.ConfigureDb<NotificationDbContext>(ConnectionStrings.NotificationDb, DatabaseNames.NotificationDatabase, true);
 
         builder.Services.AddResilienceEnricher();
 
@@ -47,7 +34,6 @@ public static class Program
         builder.Services.AddHttpContextAccessor();
 
         builder.AddSeqEndpoint(ConnectionStrings.Seq);
-        builder.AddNatsClient(ConnectionStrings.NatsServer, (IServiceProvider _, NatsOpts opt) => opt with { WaitUntilSent = false });
 
         builder.ConfigureLocalizer();
 
@@ -75,95 +61,8 @@ public static class Program
 
         app.MapDefaultEndpoints();
 
-        await app.RunMigrations();
+        await app.RunMigrations<NotificationDbContext>();
 
         await app.RunAsync();
-    }
-
-    private static void ConfigureLocalizer(this WebApplicationBuilder builder)
-    {
-        builder.Services.AddRequestLocalization(static options =>
-        {
-            options.SetDefaultCulture(CultureConsts.SupportedCultures[0])
-            .AddSupportedCultures(CultureConsts.SupportedCultures)
-            .AddSupportedUICultures(CultureConsts.SupportedCultures);
-
-            options.ApplyCurrentCultureToResponseHeaders = true;
-        });
-
-        builder.Services.AddJsonLocalization(static options => options.ResourcesPath = "Localization");
-    }
-
-    private static void ConfigureJWT(this WebApplicationBuilder builder)
-    {
-        var jwtSection = builder.Configuration.GetRequiredSection(JwtConfiguration.SectionName);
-        builder.Services.Configure<JwtConfiguration>(jwtSection);
-        var jwtConfiguration = jwtSection.Get<JwtConfiguration>();
-
-        ArgumentNullException.ThrowIfNull(jwtConfiguration);
-
-        builder.Services.AddAuthenticationJwtBearer(
-            options =>
-            {
-                options.SigningStyle = TokenSigningStyle.Asymmetric;
-                options.SigningKey = jwtConfiguration.PublicKey;
-                options.KeyIsPemEncoded = true;
-            },
-            bearer =>
-            {
-                bearer.TokenValidationParameters.ValidIssuer = jwtConfiguration.Issuer;
-                bearer.TokenValidationParameters.ValidAudience = jwtConfiguration.Audience;
-            });
-    }
-
-    private static void ConfigureSwagger(this IServiceCollection serviceeCollection)
-    {
-        serviceeCollection.SwaggerDocument(static options =>
-        {
-            options.DocumentSettings = static settings =>
-            {
-                settings.Title = "API Docs";
-                settings.Version = "v1";
-
-                foreach (var item in typeof(NotificationDbContext).Assembly.ExportedTypes.Where(p => p.IsEnum))
-                {
-                    settings.SchemaSettings.TypeMappers.Add(new PrimitiveTypeMapper(item, schema =>
-                    {
-                        schema.Type = NJsonSchema.JsonObjectType.String;
-                        schema.Format = "string";
-
-                        foreach (var value in Enum.GetValues(item))
-                        {
-                            schema.Enumeration.Add(value.ToString());
-                        }
-                    }));
-                }
-            };
-            options.ShortSchemaNames = true;
-            options.NewtonsoftSettings = static settings => settings.Converters.Add(new StringEnumConverter());
-        });
-    }
-
-    private static void ConfigureDb(this WebApplicationBuilder builder)
-    {
-        var connectionString = builder.Configuration.GetConnectionString(DatabaseNames.NotificationDatabase);
-
-        builder.AddNpgsqlDbContext<NotificationDbContext>(
-            ConnectionStrings.NotificationDb,
-            x => x.ConnectionString = connectionString,
-            static x =>
-            {
-                x.AddInterceptors(new AddOrModifyInterceptor(), new ConcurrentInterceptor(), new SoftDeleteInterceptor());
-                x.UseNpgsql();
-                x.UseExceptionProcessor();
-            });
-    }
-
-    private static async Task RunMigrations(this WebApplication app)
-    {
-        await using var scope = app.Services.CreateAsyncScope();
-        await using var authDb = scope.ServiceProvider.GetRequiredService<NotificationDbContext>();
-
-        await authDb.Database.MigrateAsync(app.Lifetime.ApplicationStopping);
     }
 }

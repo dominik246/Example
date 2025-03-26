@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Example.ServiceDefaults.Configuration;
+
+using Microsoft.Extensions.Configuration;
 
 namespace Example.AppHost;
 
@@ -9,7 +11,20 @@ public static class LocalProjectExtensions
     {
         (sqlServer, db) = builder.ApplicationBuilder.ConfigurePostgresServer(dbServerName, dbName, dbSectionName);
 
-        return builder.WithReference(db).WaitFor(db).WithRelationship(sqlServer.Resource, "WaitFor");
+        return builder.WithReference(db).WaitFor(db);
+    }
+
+    public static IResourceBuilder<ProjectResource> WithDbWorker<T>(
+        this IResourceBuilder<ProjectResource> builder, IResourceBuilder<PostgresDatabaseResource> database, string name, IResourceBuilder<SeqResource> seq,
+        IResourceBuilder<RabbitMQServerResource> mq, out IResourceBuilder<ProjectResource> worker)
+        where T : IProjectMetadata, new()
+    {
+        worker = builder.ApplicationBuilder.AddProject<T>(name)
+            .WithReference(database).WaitFor(database)
+            .WithReference(seq).WaitFor(seq)
+            .WithReference(mq).WaitFor(mq);
+
+        return builder.WithReference(worker).WaitFor(worker);
     }
 
     public static IResourceBuilder<ProjectResource> WithCache(
@@ -24,7 +39,7 @@ public static class LocalProjectExtensions
             .WithEnvironment(context => context.AddEnvVars(cacheSection));
     }
 
-    public static IResourceBuilder<ProjectResource> WithEnvironmentSection(this IResourceBuilder<ProjectResource> builder, params ReadOnlySpan<string> sectionNames)
+    public static IResourceBuilder<ProjectResource> WithEnvironmentSection(this IResourceBuilder<ProjectResource> builder, params IEnumerable<string> sectionNames)
     {
         foreach (var sectionName in sectionNames)
         {

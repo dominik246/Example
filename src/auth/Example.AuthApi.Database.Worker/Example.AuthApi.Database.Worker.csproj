@@ -1,0 +1,9 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Example.Worker.Base\Example.Worker.Base.csproj" />
+    <ProjectReference Include="..\..\base\Example.MassTransit\Example.MassTransit.csproj" />
+    <ProjectReference Include="..\Example.AuthApi.Database\Example.AuthApi.Database.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,6 +1,6 @@
-﻿using Example.AuthApi.Database;
+﻿using Example.Api.Base;
+using Example.AuthApi.Database;
 using Example.AuthApi.Database.Models;
-using Example.ServiceDefaults.Defaults;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

@@ -1,4 +1,4 @@
-﻿using Example.NotificationsApi.Database.Enums;
+﻿using Example.Database.Base.Enums;
 
 using System.Text.Json.Serialization;
 

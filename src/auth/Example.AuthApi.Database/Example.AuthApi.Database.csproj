@@ -5,10 +5,12 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="MassTransit.EntityFrameworkCore" />
   </ItemGroup>
   
   <ItemGroup>
     <ProjectReference Include="..\..\base\Example.Database.Base\Example.Database.Base.csproj" />
+    <ProjectReference Include="..\..\base\Example.MassTransit\Example.MassTransit.csproj" />
   </ItemGroup>
 
 </Project>

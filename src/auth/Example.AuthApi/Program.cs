@@ -1,22 +1,20 @@
-using EntityFramework.Exceptions.PostgreSQL;
-
+using Example.Api.Base;
+using Example.Api.Base.Consts;
 using Example.AuthApi.Database;
 using Example.AuthApi.Feature.Auth;
 using Example.AuthApi.Feature.Auth.Dtos;
-using Example.Database.Base.Interceptors;
+using Example.AuthApi.Feature.Auth.Handlers;
+using Example.MassTransit;
+using Example.MassTransit.PasswordRecovery;
+using Example.MassTransit.RegisterNewUser;
 using Example.ServiceDefaults;
 using Example.ServiceDefaults.Configuration;
-using Example.ServiceDefaults.Consts;
 
 using FastEndpoints.Security;
-using FastEndpoints.Swagger;
 
-using Microsoft.EntityFrameworkCore;
-
-using Newtonsoft.Json.Converters;
+using MassTransit;
 
 using NJsonSchema;
-using NJsonSchema.Generation.TypeMappers;
 
 using Scalar.AspNetCore;
 
@@ -38,9 +36,10 @@ public static class Program
 
         builder.ConfigureJWT();
         builder.Services.AddAuthorization();
-        builder.Services.ConfigureSwagger();
+        builder.Services.ConfigureSwagger((typeof(EmailAddress), JsonObjectType.String), (typeof(AuthPassword), JsonObjectType.String));
         builder.Services.AddFastEndpoints();
-        builder.ConfigureDb();
+        builder.ConfigureDb<AuthDbContext>(ConnectionStrings.AuthDb, DatabaseNames.AuthDatabase, true);
+        builder.ConfigureDb<AuthOutboxDbContext>(ConnectionStrings.AuthOutboxServer, DatabaseNames.AuthOutboxDatabase, false);
 
         builder.Services.AddResilienceEnricher();
 
@@ -49,8 +48,26 @@ public static class Program
 
         builder.AddSeqEndpoint(ConnectionStrings.Seq);
         builder.AddRedisClient(ConnectionStrings.AuthCache);
-        builder.AddNatsClient(ConnectionStrings.NatsServer);
-        builder.AddNatsJetStream();
+
+        builder.AddCustomMassTransit<AuthOutboxDbContext>(true, static options =>
+        {
+            options.AddSagaStateMachine<RegisterNewUserStateMachine, RegisterNewUserModelState>()
+                .EntityFrameworkRepository(static x =>
+                {
+                    x.ExistingDbContext<AuthOutboxDbContext>();
+                    x.UsePostgres();
+                });
+
+            options.AddSagaStateMachine<PasswordRecoveryStateMachine, PasswordRecoveryState>()
+                .EntityFrameworkRepository(static x =>
+                {
+                    x.ExistingDbContext<AuthOutboxDbContext>();
+                    x.UsePostgres();
+                });
+
+            options.AddConsumer<RegisterUserCacheConsumer>();
+            options.AddConsumer<PersistToCacheConsumer>();
+        });
 
         builder.ConfigureLocalizer();
 
@@ -83,93 +100,9 @@ public static class Program
 
         app.MapDefaultEndpoints();
 
-        await app.RunMigrations();
+        await app.RunMigrations<AuthDbContext>();
+        await app.RunMigrations<AuthOutboxDbContext>();
 
         await app.RunAsync();
-    }
-
-    private static void ConfigureLocalizer(this WebApplicationBuilder builder)
-    {
-        builder.Services.AddRequestLocalization(static options =>
-        {
-            options.SetDefaultCulture(CultureConsts.SupportedCultures[0])
-            .AddSupportedCultures(CultureConsts.SupportedCultures)
-            .AddSupportedUICultures(CultureConsts.SupportedCultures);
-
-            options.ApplyCurrentCultureToResponseHeaders = true;
-        });
-
-        builder.Services.AddJsonLocalization(static options => options.ResourcesPath = "Localization");
-    }
-
-    private static void ConfigureJWT(this WebApplicationBuilder builder)
-    {
-        var jwtSection = builder.Configuration.GetRequiredSection(JwtConfiguration.SectionName);
-        builder.Services.Configure<JwtConfiguration>(jwtSection);
-        var jwtConfiguration = jwtSection.Get<JwtConfiguration>();
-
-        ArgumentNullException.ThrowIfNull(jwtConfiguration);
-
-        builder.Services.AddAuthenticationJwtBearer(
-            options =>
-            {
-                options.SigningStyle = TokenSigningStyle.Asymmetric;
-                options.SigningKey = jwtConfiguration.PublicKey;
-                options.KeyIsPemEncoded = true;
-            },
-            bearer =>
-            {
-                bearer.TokenValidationParameters.ValidIssuer = jwtConfiguration.Issuer;
-                bearer.TokenValidationParameters.ValidAudience = jwtConfiguration.Audience;
-            });
-    }
-
-    private static void ConfigureSwagger(this IServiceCollection serviceeCollection)
-    {
-        serviceeCollection.SwaggerDocument(static options =>
-        {
-            options.DocumentSettings = static settings =>
-            {
-                var emailType = new ObjectTypeMapper(typeof(EmailAddress), new JsonSchema
-                {
-                    Type = JsonObjectType.String,
-                });
-
-                var passwordType = new ObjectTypeMapper(typeof(AuthPassword), new JsonSchema
-                {
-                    Type = JsonObjectType.String,
-                });
-
-                settings.Title = "API Docs";
-                settings.Version = "v1";
-                settings.SchemaSettings.TypeMappers.Add(emailType);
-                settings.SchemaSettings.TypeMappers.Add(passwordType);
-            };
-            options.ShortSchemaNames = true;
-            options.NewtonsoftSettings = static settings => settings.Converters.Add(new StringEnumConverter());
-        });
-    }
-
-    private static void ConfigureDb(this WebApplicationBuilder builder)
-    {
-        var connectionString = builder.Configuration.GetConnectionString(DatabaseNames.AuthDatabase);
-
-        builder.AddNpgsqlDbContext<AuthDbContext>(
-            ConnectionStrings.AuthDb,
-            x => x.ConnectionString = connectionString,
-            static x =>
-            {
-                x.AddInterceptors(new SoftDeleteInterceptor(), new AddOrModifyInterceptor(), new ConcurrentInterceptor());
-                x.UseNpgsql();
-                x.UseExceptionProcessor();
-            });
-    }
-
-    private static async Task RunMigrations(this WebApplication app)
-    {
-        await using var scope = app.Services.CreateAsyncScope();
-        await using var authDb = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
-
-        await authDb.Database.MigrateAsync(app.Lifetime.ApplicationStopping);
     }
 }

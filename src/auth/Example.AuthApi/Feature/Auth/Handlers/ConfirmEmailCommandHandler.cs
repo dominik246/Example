@@ -1,6 +1,6 @@
-﻿using Example.AuthApi.Database;
+﻿using Example.Api.Base;
+using Example.AuthApi.Database;
 using Example.AuthApi.Feature.Auth.Dtos;
-using Example.ServiceDefaults.Defaults;
 
 using Microsoft.EntityFrameworkCore;
 

@@ -1,15 +1,14 @@
 ﻿using Example.AuthApi.Database;
 using Example.AuthApi.Database.Models;
-using Example.ServiceDefaults;
+using Example.AuthApi.Localization;
+using Example.MassTransit.PasswordRecovery.EventModels;
 using Example.ServiceDefaults.Configuration;
-using Example.ServiceDefaults.Consts;
-using Example.ServiceDefaults.Models;
+
+using MassTransit;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
-
-using NATS.Client.JetStream;
 
 using StackExchange.Redis;
 
@@ -17,81 +16,56 @@ using System.Security.Cryptography;
 
 namespace Example.AuthApi.Feature.Auth.Handlers;
 
-public sealed record PasswordRecoveryCommand(string Email) : ICommand<bool>;
+public sealed record PasswordRecoveryCommand(string Email) : ICommand;
 
-public sealed class PasswordRecoveryCommandHandler(
-    AuthDbContext dbContext, IConnectionMultiplexer cache, IOptions<AuthCacheConfiguration> cacheConfig, IStringLocalizer localizer, INatsJSContext natsConnection)
-    : CommandHandler<PasswordRecoveryCommand, bool>
+public sealed class PasswordRecoveryCommandHandler(AuthDbContext dbContext, AuthOutboxDbContext outboxDbContext, IStringLocalizer localizer, IPublishEndpoint publishEndpoint)
+    : CommandHandler<PasswordRecoveryCommand>
 {
-    public override async Task<bool> ExecuteAsync(PasswordRecoveryCommand command, CancellationToken ct = default)
+    public override async Task ExecuteAsync(PasswordRecoveryCommand command, CancellationToken ct = default)
     {
         if (await CheckIfUserExists(dbContext, command, ct) is not User user)
         {
-            AddError(x => x.Email, "User does not exist.", "404");
-            return false;
+            ThrowError(x => x.Email, "User does not exist.", 404);
+            return;
         }
 
-        var hash = await GenerateAndPersistKey(dbContext, cache, cacheConfig, localizer, natsConnection, user, ct);
-
-        if (hash is null)
-        {
-            AddError(x => x.Email, "User does not exist.", "403");
-            return false;
-        }
-
-        return true;
-    }
-
-    private static async Task<string?> GenerateAndPersistKey(
-        AuthDbContext dbContext, IConnectionMultiplexer cache, IOptions<AuthCacheConfiguration> cacheConfig, IStringLocalizer localizer, INatsJSContext nats, User user, CancellationToken ct)
-    {
         var hash = RandomNumberGenerator.GetHexString(AuthConsts.PasswordRecoveryHexLength);
-
-        await PersistToDb(dbContext, user, hash, ct);
-        await PersistToCache(cache, cacheConfig, user, hash);
-
-        var values = new Dictionary<string, string> { { "key", hash } };
-        var data = new MailAddressModel(
-            localizer[LocalizerConsts.PasswordRecoveryCommandHandler.EmailSubject],
-            localizer[LocalizerConsts.PasswordRecoveryCommandHandler.EmailTemplate],
-            user.Email,
-            values);
-
-        await SendEmail(nats, data, ct);
-        return hash;
-    }
-
-    private static async Task<bool> SendEmail(INatsJSContext jetStream, MailAddressModel model, CancellationToken ct)
-    {
-        var response = await jetStream.PublishAsync(NatsEvents.EmailPasswordRecoverEvent, model, MailAddressModelSerializer.Default, cancellationToken: ct);
-
-        return response.IsSuccess();
-    }
-
-    private static async Task PersistToCache(IConnectionMultiplexer cache, IOptions<AuthCacheConfiguration> cacheConfig, User user, string hash)
-    {
-        var cacheDb = cache.GetDatabase();
-        var key = $"{nameof(UserPasswordRestore)}_{user.Email}";
-
-        await cacheDb.StringSetAsync(key, hash, cacheConfig.Value.ExpiryConfiguration.UserPasswordRestoreExpiry);
-    }
-
-    private static async Task<int> PersistToDb(AuthDbContext dbContext, User user, string hash, CancellationToken ct)
-    {
-        var dbResult = await dbContext.UserPasswordRestores.Where(p => p.UserId == user.Id).ToListAsync(ct);
-
-        if (dbResult is { Count: > 0 })
+        var model = new PasswordRecoveryModel
         {
-            dbContext.UserPasswordRestores.RemoveRange(dbResult);
-        }
+            Email = user.Email,
+            EmailSubject = localizer[LocalizerConsts.PasswordRecoveryCommandHandler.EmailSubject],
+            EmailTemplate = localizer[LocalizerConsts.PasswordRecoveryCommandHandler.EmailTemplate],
+            Hash = hash,
+            UserId = user.Id
+        };
 
-        dbContext.UserPasswordRestores.Add(new UserPasswordRestore { UserId = user.Id, SecurityCode = hash });
-
-        return await dbContext.SaveChangesAsync(ct);
+        await publishEndpoint.Publish(model, ct);
+        await outboxDbContext.SaveChangesAsync(ct);
     }
 
     private static async Task<User?> CheckIfUserExists(AuthDbContext dbContext, PasswordRecoveryCommand command, CancellationToken ct)
     {
         return await dbContext.Users.FirstOrDefaultAsync(x => x.Email == command.Email, ct);
+    }
+}
+
+public sealed class PersistToCacheConsumer(IConnectionMultiplexer cache, IOptions<AuthCacheConfiguration> cacheConfig) : IConsumer<PasswordRecoveryPersist>
+{
+    public async Task Consume(ConsumeContext<PasswordRecoveryPersist> context)
+    {
+        var result = await PersistToCache(cache, cacheConfig, context.Message.Email, context.Message.Hash);
+
+        if (!result)
+        {
+            await context.Publish(new PasswordRecoveryPersistToDbFailed { Id = context.Message.UserId, Reason = "Cache persistance failed." }, context.CancellationToken);
+        }
+    }
+
+    private static async Task<bool> PersistToCache(IConnectionMultiplexer cache, IOptions<AuthCacheConfiguration> cacheConfig, string email, string hash)
+    {
+        var cacheDb = cache.GetDatabase();
+        var key = $"{nameof(UserPasswordRestore)}_{email}";
+
+        return await cacheDb.StringSetAsync(key, hash, cacheConfig.Value.ExpiryConfiguration.UserPasswordRestoreExpiry);
     }
 }

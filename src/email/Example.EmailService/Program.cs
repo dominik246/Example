@@ -1,10 +1,11 @@
+using Example.AuthApi.Database;
 using Example.EmailService.Feature.SendEmail;
+using Example.MassTransit;
+using Example.MassTransit.PasswordRecovery.EventModels;
+using Example.MassTransit.RegisterNewUser.EventModels;
 using Example.ServiceDefaults;
 using Example.ServiceDefaults.Configuration;
-
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+using Example.Worker.Base;
 
 namespace Example.EmailService;
 
@@ -12,7 +13,9 @@ public static class Program
 {
     public static async Task Main(params string[] args)
     {
-        var builder = Host.CreateApplicationBuilder(args);
+        var builder = WebApplication.CreateSlimBuilder(args);
+
+        builder.WebHost.UseKestrelHttpsConfiguration();
 
         // Add service defaults & Aspire client integrations.
         builder.AddServiceDefaults();
@@ -28,15 +31,21 @@ public static class Program
         builder.Services.AddHttpContextAccessor();
 
         builder.AddSeqEndpoint(ConnectionStrings.Seq);
-        builder.AddNatsClient(ConnectionStrings.NatsServer);
-        builder.AddNatsJetStream();
+        builder.ConfigureDb<AuthOutboxDbContext>(ConnectionStrings.AuthOutboxServer, DatabaseNames.AuthOutboxDatabase, false);
+
+        builder.AddCustomMassTransit<AuthOutboxDbContext>(false, static options =>
+        {
+            options.AddConsumer<SendEmailConsumer<RegisterUserEmailSentCompleted, RegisterNewUserEmailSendFailed, RegisterNewUserMailAddressModel>>();
+            options.AddConsumer<SendEmailConsumer<PasswordRecoveryEmailSentCompleted, PasswordRecoveryEmailSentFailed, PasswordRecoveryMailAddressModel>>();
+        });
 
         builder.Services.Configure<EmailConfiguration>(builder.Configuration.GetRequiredSection(EmailConfiguration.SectionName));
 
         builder.Services.AddHttpClient<SendEmailClient>().AddStandardResilienceHandler();
-        builder.Services.AddHostedService<SendEmailHostedService>();
 
         var app = builder.Build();
+
+        app.MapDefaultEndpoints();
 
         await app.RunAsync();
     }

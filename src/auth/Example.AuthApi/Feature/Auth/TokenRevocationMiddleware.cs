@@ -1,8 +1,8 @@
-﻿using Example.AuthApi.Database;
+﻿using Example.Api.Base;
+using Example.Api.Base.Consts;
+using Example.AuthApi.Database;
 using Example.AuthApi.Database.Models;
 using Example.ServiceDefaults.Configuration;
-using Example.ServiceDefaults.Consts;
-using Example.ServiceDefaults.Defaults;
 
 using FastEndpoints.Security;
 

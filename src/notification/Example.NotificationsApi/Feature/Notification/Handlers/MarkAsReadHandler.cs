@@ -1,5 +1,6 @@
-﻿using Example.NotificationsApi.Database;
-using Example.ServiceDefaults.Consts;
+﻿using Example.Api.Base.Consts;
+using Example.Database.Base.Enums;
+using Example.NotificationsApi.Database;
 
 using FastEndpoints.Security;
 
@@ -28,7 +29,7 @@ public sealed class MarkAsReadHandler(NotificationDbContext db, IHttpContextAcce
             return false;
         }
 
-        dbResult.Status = Database.Enums.NotificationStatus.Read;
+        dbResult.Status = NotificationStatus.Read;
         db.UserNotifications.Update(dbResult);
 
         return await db.SaveChangesAsync(ct) is 1;
