@@ -1,5 +1,5 @@
-﻿using Example.ServiceDefaults.Configuration;
-using Example.ServiceDefaults.Models;
+﻿using Example.MassTransit.SendEmail;
+using Example.ServiceDefaults.Configuration;
 
 using Microsoft.Extensions.Options;
 
@@ -12,7 +12,7 @@ namespace Example.EmailService.Feature.SendEmail;
 
 public sealed class SendEmailClient(HttpClient httpClient, IOptions<EmailConfiguration> configuration)
 {
-    public async Task<bool> SendAsync(MailAddressModel values, CancellationToken token)
+    public async Task<bool> SendAsync(AbstractMailAddressModel values, CancellationToken token)
     {
         using var message = ConstructMessage(configuration.Value, values);
 
@@ -21,7 +21,7 @@ public sealed class SendEmailClient(HttpClient httpClient, IOptions<EmailConfigu
         return result.IsSuccessStatusCode;
     }
 
-    private static HttpRequestMessage ConstructMessage(EmailConfiguration config, MailAddressModel values)
+    private static HttpRequestMessage ConstructMessage(EmailConfiguration config, AbstractMailAddressModel values)
     {
         var form = new Dictionary<string, string>
         {

@@ -1,6 +1,6 @@
-﻿using Example.AuthApi.Feature.Auth.Dtos;
+﻿using Example.Api.Base.Consts;
+using Example.AuthApi.Feature.Auth.Dtos;
 using Example.AuthApi.Feature.Auth.Handlers;
-using Example.ServiceDefaults.Consts;
 
 using FastEndpoints.Security;
 

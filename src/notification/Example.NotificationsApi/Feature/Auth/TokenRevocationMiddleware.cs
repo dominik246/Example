@@ -1,5 +1,5 @@
-﻿using Example.ServiceDefaults.Configuration;
-using Example.ServiceDefaults.Consts;
+﻿using Example.Api.Base.Consts;
+using Example.ServiceDefaults.Configuration;
 
 using FastEndpoints.Security;
 

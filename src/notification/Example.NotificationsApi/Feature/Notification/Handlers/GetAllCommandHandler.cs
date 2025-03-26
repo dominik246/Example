@@ -1,8 +1,8 @@
-﻿using Example.NotificationsApi.Database;
-using Example.NotificationsApi.Database.Enums;
+﻿using Example.Api.Base.Consts;
+using Example.Database.Base.Enums;
+using Example.NotificationsApi.Database;
 using Example.NotificationsApi.Database.Models;
 using Example.NotificationsApi.Feature.Notification.Dtos;
-using Example.ServiceDefaults.Consts;
 
 using FastEndpoints.Security;
 
@@ -66,6 +66,6 @@ public sealed class GetAllCommandHandler(NotificationDbContext db, IHttpContextA
 
         var mapped = dbResult.Select(p => new NotificationDto(p.Notification!.Id, p.Notification.Message, p.Notification.IssuedByUserId, p.Notification.Severity, p.Status, p.Notification.DateCreated));
 
-        return new(mapped.ToList());
+        return new([.. mapped]);
     }
 }

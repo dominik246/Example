@@ -1,4 +1,4 @@
-﻿using Example.NotificationsApi.Database.Enums;
+﻿using Example.Database.Base.Enums;
 
 namespace Example.NotificationsApi.Feature.Notification.Dtos;
 

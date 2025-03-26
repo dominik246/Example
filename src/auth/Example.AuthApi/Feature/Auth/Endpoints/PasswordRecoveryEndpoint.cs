@@ -13,14 +13,7 @@ public sealed class PasswordRecoveryEndpoint : Endpoint<PasswordRecoveryRequest,
 
     public override async Task HandleAsync(PasswordRecoveryRequest req, CancellationToken ct)
     {
-        var verifyResult = await new PasswordRecoveryCommand(req.Email).ExecuteAsync(ct);
-
-        if (!verifyResult)
-        {
-            await SendErrorsAsync(400, ct);
-            return;
-        }
-
+        await new PasswordRecoveryCommand(req.Email).ExecuteAsync(ct);
         await SendNoContentAsync(ct);
     }
 }

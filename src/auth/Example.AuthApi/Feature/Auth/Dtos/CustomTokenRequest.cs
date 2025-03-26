@@ -1,6 +1,4 @@
-﻿using Example.ServiceDefaults.Consts;
-
-using FastEndpoints.Security;
+﻿using FastEndpoints.Security;
 
 using FluentValidation;
 

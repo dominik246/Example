@@ -1,5 +1,5 @@
 ﻿using Example.Database.Base.BaseModels;
-using Example.NotificationsApi.Database.Enums;
+using Example.Database.Base.Enums;
 
 using System.ComponentModel.DataAnnotations;
 

@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\auth\Example.AuthApi.Database.Worker\Example.AuthApi.Database.Worker.csproj" />
     <ProjectReference Include="..\notification\Example.NotificationsApi\Example.NotificationsApi.csproj" />
     <ProjectReference Include="..\auth\Example.AuthApi\Example.AuthApi.csproj" />
     <ProjectReference Include="..\email\Example.EmailService\Example.EmailService.csproj" />
@@ -16,9 +17,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.AppHost" />
-    <PackageReference Include="Aspire.Hosting.Nats" />
     <PackageReference Include="Aspire.Hosting.PostgreSQL" />
+    <PackageReference Include="Aspire.Hosting.RabbitMQ" />
+    <PackageReference Include="Aspire.Hosting.AppHost" />
     <PackageReference Include="Aspire.Hosting.Redis" />
     <PackageReference Include="Aspire.Hosting.Seq" />
     <PackageReference Include="OpenTelemetry.Api" />

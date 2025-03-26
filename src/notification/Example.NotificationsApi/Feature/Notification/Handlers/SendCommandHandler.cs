@@ -1,7 +1,7 @@
-﻿using Example.NotificationsApi.Database;
-using Example.NotificationsApi.Database.Enums;
+﻿using Example.Api.Base.Consts;
+using Example.Database.Base.Enums;
+using Example.NotificationsApi.Database;
 using Example.NotificationsApi.Database.Models;
-using Example.ServiceDefaults.Consts;
 
 using FastEndpoints.Security;
 

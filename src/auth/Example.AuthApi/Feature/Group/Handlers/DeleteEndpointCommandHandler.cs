@@ -1,5 +1,5 @@
-﻿using Example.AuthApi.Database;
-using Example.ServiceDefaults.Consts;
+﻿using Example.Api.Base.Consts;
+using Example.AuthApi.Database;
 
 using FastEndpoints.Security;
 

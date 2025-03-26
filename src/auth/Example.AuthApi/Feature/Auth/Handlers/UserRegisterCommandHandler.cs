@@ -1,18 +1,18 @@
-﻿using Example.AuthApi.Database;
+﻿using Example.Api.Base;
+using Example.Api.Base.Consts;
+using Example.AuthApi.Database;
 using Example.AuthApi.Database.Models;
 using Example.AuthApi.Feature.Auth.Dtos;
-using Example.ServiceDefaults;
+using Example.AuthApi.Localization;
+using Example.MassTransit.RegisterNewUser.EventModels;
 using Example.ServiceDefaults.Configuration;
-using Example.ServiceDefaults.Consts;
-using Example.ServiceDefaults.Defaults;
-using Example.ServiceDefaults.Models;
+
+using MassTransit;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
-
-using NATS.Client.JetStream;
 
 using StackExchange.Redis;
 
@@ -21,78 +21,69 @@ using System.Text.Json;
 
 namespace Example.AuthApi.Feature.Auth.Handlers;
 
-public sealed record UserRegisterCommand(string Email, string Password) : ICommand<bool>;
+public sealed record UserRegisterCommand(string Email, string Password) : ICommand;
 
 public sealed class UserRegisterCommandHandler(
-    AuthDbContext dbContext, IConnectionMultiplexer cache, IOptions<AuthCacheConfiguration> cacheConfig, IStringLocalizer localizer, INatsJSContext natsConnection)
-    : CommandHandler<UserRegisterCommand, bool>
+    AuthDbContext dbContext, IStringLocalizer localizer, IPublishEndpoint publishEndpoint)
+    : CommandHandler<UserRegisterCommand>
 {
-    public override async Task<bool> ExecuteAsync(UserRegisterCommand command, CancellationToken ct = default)
+    public override async Task ExecuteAsync(UserRegisterCommand command, CancellationToken ct = default)
     {
         var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Email == command.Email, ct);
         if (user is not null)
         {
-            AddError(x => x.Email, "User already exists.", "403");
-            return false;
+            ThrowError(x => x.Email, "User already exists.", 403);
+            return;
         }
 
-        var newUser = CreateNewUser(command);
-
+        var userId = Guid.CreateVersion7();
         var emailConfirmHash = RandomNumberGenerator.GetHexString(AuthConsts.ConfirmEmailHexLength);
 
-        await PersistUserIntoCache(cache, cacheConfig, newUser);
-        await PersistEmailConfirmIntoCache(cache, cacheConfig, emailConfirmHash, newUser);
-        await PersistIntoDb(dbContext, newUser, ct); // TODO: db writer
+        var publishModel = new RegisterNewUserModel
+        {
+            Email = command.Email,
+            EmailConfirmHash = emailConfirmHash,
+            EmailSubject = localizer[LocalizerConsts.UserRegisterCommandHandler.EmailSubject],
+            EmailTemplate = localizer[LocalizerConsts.UserRegisterCommandHandler.EmailTemplate],
+            UserId = userId,
+            PasswordHash = new PasswordHasher<User>().HashPassword(null!, command.Password),
+        };
 
-        var values = new Dictionary<string, string> { { "key", emailConfirmHash } };
-        var data = new MailAddressModel(
-            localizer[LocalizerConsts.UserRegisterCommandHandler.EmailSubject],
-            localizer[LocalizerConsts.UserRegisterCommandHandler.EmailTemplate],
-            newUser.Email,
-            values);
-
-        return await SendEmail(natsConnection, data, ct);
+        await publishEndpoint.Publish(publishModel, ct);
     }
+}
 
-    private static User CreateNewUser(UserRegisterCommand command)
+public sealed class RegisterUserCacheConsumer(IConnectionMultiplexer cache, IOptions<AuthCacheConfiguration> cacheConfig) : IConsumer<PersistNewUser>
+{
+    public async Task Consume(ConsumeContext<PersistNewUser> context)
     {
-        var userEntity = new User { Email = command.Email };
-        userEntity.PasswordHash = new PasswordHasher<User>().HashPassword(userEntity, command.Password);
+        var userResult = await PersistUserIntoCache(cache, cacheConfig, context.Message);
+        var emailResult = await PersistEmailConfirmIntoCache(cache, cacheConfig, context.Message);
 
-        return userEntity;
+        if (!userResult || !emailResult)
+        {
+            await context.Publish(new RegisterNewUserPersistToDbFailed { Id = context.Message.UserId, Reason = "Cache failed to persist." }, context.CancellationToken);
+            return;
+        }
     }
 
-    private static async Task PersistIntoDb(AuthDbContext dbContext, User userEntity, CancellationToken ct)
-    {
-        dbContext.Users.Add(userEntity);
-
-        await dbContext.SaveChangesAsync(ct);
-    }
-
-    private static async Task PersistUserIntoCache(IConnectionMultiplexer cache, IOptions<AuthCacheConfiguration> cacheConfig, User user)
-    {
-        var db = cache.GetDatabase();
-        var key = $"{nameof(User)}_{user.Email}";
-
-        var cacheValue = JsonSerializer.Serialize(user, JsonSerializerDefaultValues.CacheOptions);
-        await db.StringSetAsync(key, cacheValue, cacheConfig.Value.ExpiryConfiguration.UserExpiry);
-    }
-
-    private static async Task PersistEmailConfirmIntoCache(IConnectionMultiplexer cache, IOptions<AuthCacheConfiguration> cacheConfig, string emailConfirmHash, User user)
+    private static async Task<bool> PersistUserIntoCache(IConnectionMultiplexer cache, IOptions<AuthCacheConfiguration> cacheConfig, PersistNewUser context)
     {
         var db = cache.GetDatabase();
-        var key = $"{nameof(ConfirmEmailRequest)}_{user.Email}";
+        var key = $"{nameof(User)}_{context.Email}";
 
-        var value = new ConfirmEmailRequest { Email = user.Email, Hash = emailConfirmHash };
+        var cacheValue = JsonSerializer.Serialize(context, JsonSerializerDefaultValues.CacheOptions);
+        return await db.StringSetAsync(key, cacheValue, cacheConfig.Value.ExpiryConfiguration.UserExpiry);
+    }
+
+    private static async Task<bool> PersistEmailConfirmIntoCache(IConnectionMultiplexer cache, IOptions<AuthCacheConfiguration> cacheConfig, PersistNewUser context)
+    {
+        var db = cache.GetDatabase();
+        var key = $"{nameof(ConfirmEmailRequest)}_{context.Email}";
+
+        var value = new ConfirmEmailRequest { Email = context.Email, Hash = context.EmailConfirmHash };
 
         var cacheValue = JsonSerializer.Serialize(value, JsonSerializerDefaultValues.CacheOptions);
-        await db.StringSetAsync(key, cacheValue, cacheConfig.Value.ExpiryConfiguration.EmailConfirmExpiry);
-    }
-
-    private static async Task<bool> SendEmail(INatsJSContext jetStream, MailAddressModel model, CancellationToken ct)
-    {
-        var response = await jetStream.PublishAsync(NatsEvents.EmailPasswordRecoverEvent, model, MailAddressModelSerializer.Default, cancellationToken: ct);
-
-        return response.IsSuccess();
+        return await db.StringSetAsync(key, cacheValue, cacheConfig.Value.ExpiryConfiguration.EmailConfirmExpiry);
     }
 }

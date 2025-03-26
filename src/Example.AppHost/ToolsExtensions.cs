@@ -9,27 +9,17 @@ namespace Example.AppHost;
 
 public static class ToolsExtensions
 {
-    public static IResourceBuilder<NatsServerResource> ConfigureNats(this IDistributedApplicationBuilder builder)
+    public static IResourceBuilder<RabbitMQServerResource> AddRabbitMQ(this IDistributedApplicationBuilder builder)
     {
-        var config = builder.Configuration.GetRequiredSection(NatsConfiguration.SectionName).Get<NatsConfiguration>();
+        var config = builder.Configuration.GetRequiredSection(MqConfiguration.SectionName).Get<MqConfiguration>();
         ArgumentNullException.ThrowIfNull(config);
 
-        var username = builder.AddParameter("nats-username", config.Username, false, true);
-        var password = builder.AddParameter("nats-password", config.Password, false, true);
+        var username = builder.AddParameter("mq-username", config.Username, false, true);
+        var password = builder.AddParameter("mq-password", config.Password, false, true);
 
-        const int port = 43589;
-        var nats = builder.AddNats(ConnectionStrings.NatsServer, port, username, password)
-            .WithEndpoint(4222, port, "http")
-            .WithJetStream()
-            .WithDataVolume();
+        var mq = builder.AddRabbitMQ(ConnectionStrings.RabbitMq, username, password).WithDataVolume().WithManagementPlugin();
 
-        nats.WithArgs(context =>
-        {
-            context.Args.Add("--http_port");
-            context.Args.Add(port);
-        });
-
-        return nats;
+        return mq;
     }
 
     public static IResourceBuilder<SeqResource> ConfigureSeq(this IDistributedApplicationBuilder builder)
@@ -43,19 +33,6 @@ public static class ToolsExtensions
             .WithEnvironment("ACCEPT_EULA", "Y");
 
         return seq;
-    }
-
-    public static IResourceBuilder<ContainerResource> AddSqlPad(this IDistributedApplicationBuilder builder)
-    {
-        var sqlPad = builder
-            .AddContainer("sqlpad", "sqlpad/sqlpad")
-            .WithEnvironment("SQLPAD_ADMIN", "admin")
-            .WithEnvironment("SQLPAD_ADMIN_PASSWORD", "admin")
-            .WithHttpEndpoint(3000, 3000)
-            .ExcludeFromManifest()
-            .WithCustomDataVolume("data", "/var/lib/sqlpad");
-
-        return sqlPad;
     }
 
     public static IResourceBuilder<ContainerResource> AddDbGate(this IDistributedApplicationBuilder builder)

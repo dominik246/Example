@@ -13,13 +13,7 @@ public sealed class UserRegisterEndpoint : Endpoint<RegisterRequest>
 
     public override async Task HandleAsync(RegisterRequest req, CancellationToken ct)
     {
-        var result = await new UserRegisterCommand(req.Email, req.Password).ExecuteAsync(ct);
-        if (!result)
-        {
-            await SendErrorsAsync(400, ct);
-            return;
-        }
-
+        await new UserRegisterCommand(req.Email, req.Password).ExecuteAsync(ct);
         await SendNoContentAsync(ct);
     }
 }
